@@ -33,7 +33,7 @@ def total_acquisitions_by_company(engine):
     df.plot(kind='bar', x='acquirer', y='total_acquisitions', title='Total Acquisitions per Company')
     plt.xlabel('Acquirer')
     plt.ylabel('Total Acquisitions')
-    plt.show()
+    st.pyplot(plt.gcf())
     return df
 
 # Acquisitions per year with acquirers included
@@ -58,7 +58,7 @@ def acquisitions_per_year(engine):
     plt.grid(axis="y", linestyle="--", alpha=0.7)
     
     # Show the plot
-    plt.show()
+    st.pyplot(plt.gcf())
     
     return df
 
@@ -72,7 +72,7 @@ def most_active_acquirer(engine):
         LIMIT 1
     """
     df = pd.read_sql(query, engine)
-    display(df)
+    print(df)
     return df
 
 # Largest acquisition details
@@ -89,7 +89,7 @@ def largest_acquisition(engine):
 
     df["acquisition_price_usd"] = df["acquisition_price_usd"].apply(lambda x: f"${x:,.2f}B")
 
-    display(df)
+    print(df)
     return df
 
 #Acquirer by maturity status (10+years means matured)
@@ -121,7 +121,7 @@ def maturity_status(engine):
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
     # Show plot
-    plt.show()
+    st.pyplot(plt.gcf())
 
     return df  
 
@@ -152,8 +152,8 @@ def industry_distribution(engine):
         plt.grid(axis="y", linestyle="--", alpha=0.7)
         
         # Show the plot
-        plt.show()
-
+        st.pyplot(plt.gcf())
+        
     return df 
 
 #Most expensive acquisitions by acquirer
@@ -204,7 +204,7 @@ def top_acquisitions(engine):
     plt.legend(title="Acquirer", bbox_to_anchor=(1, 1))
 
     # Display plot
-    plt.show()
+    st.pyplot(plt.gcf())
 
     return df 
 
@@ -227,7 +227,7 @@ def acquisition_price_by_acquirer(engine):
     plt.xlabel("Acquirer")
     plt.ylabel("Acquisition Price (in billion USD)")
     plt.xticks(rotation=45)
-    plt.show()
+    st.pyplot(plt.gcf())
 
 #Net income vs number of acquisitions
 def net_income_vs_acquisitions(engine):
@@ -271,7 +271,7 @@ def net_income_vs_acquisitions(engine):
     plt.ylabel("Number of M&A Deals")
     plt.xticks(rotation=45)
     plt.legend(title="Company", bbox_to_anchor=(1, 1))  
-    plt.show()
+    st.pyplot(plt.gcf())
 
 
 #Average pricing by maturity status
@@ -293,7 +293,7 @@ def avg_price_by_maturity(engine):
     plt.ylabel("Average Acquisition Price (in Billions USD)")
     plt.title("Are Matured Companies More Expensive?")
     plt.xticks([0, 1], ["Not Matured (<10 years)", "Matured (10+ years)"])
-    plt.show()
+    st.pyplot(plt.gcf())
 
 #M&A spending as a percentage of revenue
 def ma_spending_vs_revenue(engine):
@@ -333,7 +333,7 @@ def ma_spending_vs_revenue(engine):
     plt.ylabel("M&A Spending / Revenue Ratio")
     plt.legend(title="Acquirer", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.grid(True)
-    plt.show()
+    st.pyplot(plt.gcf())
 
 #Stock price comparison as of last time data was pulled
 def stock_price_comparison(engine):
@@ -364,7 +364,7 @@ def stock_price_comparison(engine):
     plt.xlabel("Company")
     plt.ylabel("Stock Price (USD)")
     plt.xticks(rotation=45)
-    plt.show()
+    st.pyplot(plt.gcf())
 
 
 #Run any of the above analysis function.
