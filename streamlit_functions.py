@@ -18,6 +18,15 @@ company_colors = {
     "State Street":       "#003865"
 }
 
+# Mapping symbols to company names
+symbol_to_company = {
+    "BRK-B": "Berkshire Hathaway",
+    "BLK": "BlackRock",
+    "GS": "Goldman Sachs",
+    "JPM": "JPMorgan Chase",
+    "STT": "State Street"
+}
+
 #Set up connection and password for SQL
 def sql_setup():
     # Get database configuration from st.secrets
@@ -111,7 +120,7 @@ def largest_acquisition(engine):
 
     # Display in Streamlit
     st.subheader("Largest Acquisition Details")
-    st.dataframe(df)  # Shows the formatted table in Streamlit
+    st.dataframe(df)  # works for streamlit
     
     return df
 
@@ -278,7 +287,9 @@ def net_income_vs_acquisitions(engine):
     df_merged["netIncome_billion"] = df_merged["netIncome"] / 1e9
 
     plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=df_merged, x="netIncome_billion", y="num_acquisitions", hue="symbol", style="symbol", palette==[company_colors[symbol_to_company[sym]] for sym in df_merged["symbol"]], s=150)
+    palette = {sym: company_colors[symbol_to_company[sym]] for sym in df_merged["symbol"].unique()}
+
+    sns.scatterplot(data=df_merged, x="netIncome_billion", y="num_acquisitions", hue="symbol", style="symbol", palette=palette, s=150)
     
     plt.xscale("log")
     plt.title("Net Income vs. Number of Acquisitions by Acquirer")
