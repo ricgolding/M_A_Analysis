@@ -41,6 +41,8 @@ def total_acquisitions_by_company(engine):
         ORDER BY total_acquisitions DESC
     """
     df = pd.read_sql(query, engine)
+
+    #list to map company colors
     colors = [company_colors[acquirer] for acquirer in df['acquirer']]
     ax = df.plot(kind='bar', 
                  x='acquirer', 
@@ -278,7 +280,6 @@ def avg_price_by_maturity(engine):
     # Convert to billions
     df["avg_acquisition_price_usd"] = df["avg_acquisition_price_usd"] / 1e9
 
-    # Plot
     plt.figure(figsize=(8, 5))
     sns.barplot(x=df["matured"].astype(str), y=df["avg_acquisition_price_usd"], palette="coolwarm")
     plt.xlabel("Maturity Status (0 = Non-Matured, 1 = Matured)")
@@ -313,7 +314,6 @@ def ma_spending_vs_revenue(engine):
     df_analysis = pd.merge(df_ma, df_income, on=["symbol", "year"], how="left")
     df_analysis["ma_spending_to_revenue"] = df_analysis["total_ma_spending"] / df_analysis["avg_revenue"]
 
-    # Plot
     plt.figure(figsize=(12, 6))
     for symbol in df_analysis["symbol"].unique():
         subset = df_analysis[df_analysis["symbol"] == symbol]
@@ -347,7 +347,6 @@ def stock_price_comparison(engine):
     # Map symbols to colors
     colors = [company_colors[symbol_to_company[symbol]] for symbol in df['symbol']]
 
-    # Plot
     plt.figure(figsize=(10, 6))
     ax = sns.barplot(data=df, x="symbol", y="avg_price", palette=colors)
 
