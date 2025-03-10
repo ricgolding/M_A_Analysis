@@ -42,7 +42,7 @@ FIELDS TERMINATED BY ';'
 ENCLOSED BY '"' 
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(acquisition_date, acquisition_type, acquired_company, acquired_company_domain, acquirer, acquisition_price_usd, @is_key_acquisition, founded_year, location, company_details_overview, disclosed, industry, acquisition_year, @matured)
+(acquisition_date, acquisition_type, acquired_company, acquired_company_domain, acquirer, acquisition_price_usd, @is_key_acquisition, founded_year, company_details_overview, disclosed, industry, acquisition_year, @matured, city, state_province_region, country)
 SET
   is_key_acquisition = IF(@is_key_acquisition='True',1,0),
   matured = IF(@matured='True',1,0);

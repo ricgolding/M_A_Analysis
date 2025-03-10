@@ -9,6 +9,15 @@ import getpass  # To get the password without showing the input
 import streamlit as st
 import os  # Use environment variables instead of getpass
 
+
+company_colors = {
+    "Berkshire Hathaway": "#4B0082",
+    "BlackRock":          "#000000",
+    "Goldman Sachs":      "#A7E1FF",
+    "JPMorgan Chase":     "#B5B5AC",
+    "State Street":       "#003865"
+}
+
 #Set up connection and password for SQL
 def sql_setup():
     # Get database configuration from st.secrets
@@ -30,9 +39,18 @@ def total_acquisitions_by_company(engine):
         ORDER BY total_acquisitions DESC
     """
     df = pd.read_sql(query, engine)
-    df.plot(kind='bar', x='acquirer', y='total_acquisitions', title='Total Acquisitions per Company')
+    colors = [company_colors[acquirer] for acquirer in df['acquirer']]
+    
+    ax = df.plot(kind='bar', 
+                 x='acquirer', 
+                 y='total_acquisitions', 
+                 color=colors, 
+                 figsize=(10,6), 
+                 title='Total Acquisitions per Company')
+    
     plt.xlabel('Acquirer')
     plt.ylabel('Total Acquisitions')
+    plt.xticks(rotation=45)
     st.pyplot(plt.gcf())
     return df
 
@@ -46,20 +64,19 @@ def acquisitions_per_year(engine):
     """
     df = pd.read_sql(query, engine)
     pivot_df = df.pivot(index='acquisition_year', columns='acquirer', values='total_acquisitions').fillna(0)
+
+    # Assign colors for the stacked bar chart
+    acquirer_colors = [company_colors[acquirer] for acquirer in pivot_df.columns]
     
-    # Plot bar chart with wider bars by adjusting bar width
-    ax = pivot_df.plot(kind='bar', stacked=False, figsize=(14, 7), width=0.8)  # Increased width from default 0.8
+    ax = pivot_df.plot(kind='bar', stacked=False, figsize=(14, 7), width=0.8, color=acquirer_colors)
     
-    # Formatting
     plt.title('Acquisitions per Year by Acquirer')
     plt.xlabel('Year')
     plt.ylabel('Total Acquisitions')
     plt.xticks(rotation=45, ha="right")
     plt.grid(axis="y", linestyle="--", alpha=0.7)
     
-    # Show the plot
     st.pyplot(plt.gcf())
-    
     return df
 
 # Most active acquirer (top 1)
@@ -72,7 +89,11 @@ def most_active_acquirer(engine):
         LIMIT 1
     """
     df = pd.read_sql(query, engine)
-    print(df)
+    
+    # Display in Streamlit
+    st.subheader("Most Active Acquirer")
+    st.dataframe(df) #works for streamlit
+    
     return df
 
 # Largest acquisition details
@@ -86,10 +107,12 @@ def largest_acquisition(engine):
     df = pd.read_sql(query, engine)
 
     df["acquisition_price_usd"] = df["acquisition_price_usd"] / 1e9
-
     df["acquisition_price_usd"] = df["acquisition_price_usd"].apply(lambda x: f"${x:,.2f}B")
 
-    print(df)
+    # Display in Streamlit
+    st.subheader("Largest Acquisition Details")
+    st.dataframe(df)  # Shows the formatted table in Streamlit
+    
     return df
 
 #Acquirer by maturity status (10+years means matured)
@@ -141,25 +164,28 @@ def industry_distribution(engine):
         # Count the number of acquisitions per industry
         industry_counts = df_subset["industry"].value_counts()
         
+        # Apply company-specific color
+        color = company_colors[acquirer]
+
         # Plot as a bar chart
-        industry_counts.plot(kind="bar", color="royalblue", alpha=0.75)
+        industry_counts.plot(kind="bar", color=color, alpha=0.75)
 
         # Formatting
         plt.title(f"Industry Distribution of Acquisitions for {acquirer}")
         plt.xlabel("Industry")
         plt.ylabel("Number of Acquisitions")
-        plt.xticks(rotation=45, ha="right")  # Rotate x-axis labels for better readability
+        plt.xticks(rotation=45, ha="right")  
         plt.grid(axis="y", linestyle="--", alpha=0.7)
         
         # Show the plot
         st.pyplot(plt.gcf())
         
-    return df 
+    return df  
 
 #Most expensive acquisitions by acquirer
 def top_acquisitions(engine):
     query = """
-        SELECT acquirer, acquired_company, acquisition_price_usd
+        SELECT acquirer, acquired_company, acquisition_price_usd, acquisition_year
         FROM mergers_acquisitions
     """
     df = pd.read_sql(query, engine)
@@ -168,11 +194,14 @@ def top_acquisitions(engine):
     df["acquisition_price_usd_billions"] = df["acquisition_price_usd"] / 1e9
 
     # Group by acquirer and acquired company, summing the acquisition price
-    acquirer_table = df.groupby(['acquirer', 'acquired_company','acquisition_year'], as_index=False)['acquisition_price_usd_billions'].sum()
+    acquirer_table = df.groupby(['acquirer', 'acquired_company', 'acquisition_year'], as_index=False)['acquisition_price_usd_billions'].sum()
 
     # Select the top 3 acquisitions for each acquirer
     top_acquisitions_per_acquirer = acquirer_table.groupby("acquirer").apply(
         lambda x: x.nlargest(3, "acquisition_price_usd_billions")).reset_index(drop=True)
+
+    # Assign colors for the acquirers
+    acquirer_colors = [company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"]]
 
     # Create bar plot
     plt.figure(figsize=(14, 7))
@@ -180,7 +209,7 @@ def top_acquisitions(engine):
                      x="acquisition_price_usd_billions", 
                      y="acquired_company", 
                      hue="acquirer", 
-                     palette="tab10")
+                     palette=acquirer_colors)
 
     # Rotate x-axis labels for better readability
     plt.xticks(rotation=45, ha="right")
@@ -191,11 +220,9 @@ def top_acquisitions(engine):
     plt.ylabel("Acquired Company")
 
     # Add value labels to bars
-    
     for p in ax.patches:
-        width = p.get_width()  # Get bar width
-        if width > 0:  # Only annotate if there's data
-            acquisition_date = row["acquisition_year"]
+        width = p.get_width()  
+        if width > 0:  
             ax.annotate(f"${width:,.2f}B",  
                         (p.get_x() + width + 0.2, p.get_y() + p.get_height() / 2),  
                         ha='left', va='center', fontsize=9, fontweight='bold', color='black')
@@ -216,13 +243,13 @@ def acquisition_price_by_acquirer(engine):
         GROUP BY acquirer
     """
     df = pd.read_sql(query, engine)
+    df["total_acquisition_price_usd"] /= 1e9
 
-    # Convert to billions
-    df["total_acquisition_price_usd"] = df["total_acquisition_price_usd"] / 1e9
+    colors = [company_colors[acquirer] for acquirer in df['acquirer']]
 
-    # Plot
     plt.figure(figsize=(10, 6))
-    sns.barplot(x="acquirer", y="total_acquisition_price_usd", data=df, palette="tab10")
+    sns.barplot(x="acquirer", y="total_acquisition_price_usd", data=df, palette=colors)
+
     plt.title("Acquisition Price by Acquirer")
     plt.xlabel("Acquirer")
     plt.ylabel("Acquisition Price (in billion USD)")
@@ -237,42 +264,28 @@ def net_income_vs_acquisitions(engine):
         JOIN companies c ON ma.acquirer = c.company_name
         GROUP BY c.symbol
     """
-    
     query_income = """
         SELECT symbol, statement_date AS date, netIncome
         FROM income_statements
     """
-    
     df_ma = pd.read_sql(query_ma, engine)
     df_income = pd.read_sql(query_income, engine)
 
-    # Process data
     df_income["date"] = pd.to_datetime(df_income["date"])
     df_income_latest = df_income.sort_values(by="date", ascending=False).drop_duplicates(subset=["symbol"])
     
-    # Merge datasets
     df_merged = pd.merge(df_income_latest, df_ma, on="symbol", how="left").fillna(0)
     df_merged["netIncome_billion"] = df_merged["netIncome"] / 1e9
 
-    # Plot
     plt.figure(figsize=(10, 6))
-    sns.scatterplot(
-        data=df_merged, 
-        x="netIncome_billion", 
-        y="num_acquisitions", 
-        hue="symbol",  
-        style="symbol",  
-        palette="tab10",  
-        s=150  
-    )
+    sns.scatterplot(data=df_merged, x="netIncome_billion", y="num_acquisitions", hue="symbol", style="symbol", palette==[company_colors[symbol_to_company[sym]] for sym in df_merged["symbol"]], s=150)
+    
     plt.xscale("log")
     plt.title("Net Income vs. Number of Acquisitions by Acquirer")
     plt.xlabel("Net Income (in Billions USD, Log Scale)")
     plt.ylabel("Number of M&A Deals")
-    plt.xticks(rotation=45)
-    plt.legend(title="Company", bbox_to_anchor=(1, 1))  
+    plt.legend(title="Company", bbox_to_anchor=(1, 1))
     st.pyplot(plt.gcf())
-
 
 #Average pricing by maturity status
 def avg_price_by_maturity(engine):
@@ -304,29 +317,25 @@ def ma_spending_vs_revenue(engine):
         WHERE YEAR(ma.acquisition_date) >= 2020
         GROUP BY c.symbol, year
     """
-    
     query_income = """
         SELECT symbol, YEAR(statement_date) as year, AVG(revenue) as avg_revenue
         FROM income_statements
         GROUP BY symbol, year
     """
-
     df_ma = pd.read_sql(query_ma, engine)
     df_income = pd.read_sql(query_income, engine)
 
-    # Convert to billions
-    df_ma["total_ma_spending"] = df_ma["total_ma_spending"] / 1e9
-    df_income["avg_revenue"] = df_income["avg_revenue"] / 1e9
+    df_ma["total_ma_spending"] /= 1e9
+    df_income["avg_revenue"] /= 1e9
 
-    # Merge data
     df_analysis = pd.merge(df_ma, df_income, on=["symbol", "year"], how="left")
     df_analysis["ma_spending_to_revenue"] = df_analysis["total_ma_spending"] / df_analysis["avg_revenue"]
 
-    # Plot
     plt.figure(figsize=(12, 6))
-    for acquirer in df_analysis["symbol"].unique():
-        subset = df_analysis[df_analysis["symbol"] == acquirer]
-        plt.plot(subset["year"], subset["ma_spending_to_revenue"], marker="o", label=acquirer)
+    for symbol in df_analysis["symbol"].unique():
+        subset = df_analysis[df_analysis["symbol"] == symbol]
+        company = symbol_to_company[symbol]  
+        plt.plot(subset["year"], subset["ma_spending_to_revenue"], marker="o", label=symbol, color=company_colors[company])
 
     plt.title("M&A Spending Relative to Revenue by Acquirer (Since 2020)")
     plt.xlabel("Year")
@@ -335,26 +344,22 @@ def ma_spending_vs_revenue(engine):
     plt.grid(True)
     st.pyplot(plt.gcf())
 
+
 #Stock price comparison as of last time data was pulled
 def stock_price_comparison(engine):
-    """
-    Plots a stock price comparison of acquiring companies, displaying the latest stock_timestamp in the title.
-    """
     query = """
         SELECT symbol, AVG(price) as avg_price, MAX(stock_timestamp) as last_update
         FROM stock_prices
         GROUP BY symbol
     """
     df = pd.read_sql(query, engine)
-
-    # Get the latest timestamp
     last_update = df["last_update"].max()
 
-    # Plot
+    colors = [company_colors[symbol_to_company[symbol]] for symbol in df['symbol']]
+
     plt.figure(figsize=(10, 6))
-    ax = sns.barplot(data=df, x="symbol", y="avg_price", palette="tab10")
-    
-    # Add value labels
+    ax = sns.barplot(data=df, x="symbol", y="avg_price", palette=colors)
+
     for p in ax.patches:
         ax.annotate(f"${p.get_height():,.2f}", 
                     (p.get_x() + p.get_width() / 2., p.get_height()), 

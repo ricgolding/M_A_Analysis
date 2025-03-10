@@ -68,4 +68,4 @@ ALTER TABLE `mergers_acquisitions` ADD INDEX (`acquirer`);
 
 -- Fix the foreign key reference
 ALTER TABLE 
-	`mergers_acquisitions` ADD CONSTRAINT `mergers_acquisitions_acquirer_foreign` FOREIGN KEY(`acquirer`) REFERENCES `companies`(`company_name`);
+	`mergers_acquisitions` ADD CONSTRAINT `mergers_acquisitions_acquirer_foreign` FOREIGN KEY(`acquirer`) REFERENCES `companies`(`symbol`);
