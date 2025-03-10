@@ -213,7 +213,7 @@ def top_acquisitions(engine):
     acquirer_colors = {acquirer: company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"].unique()}
 
     # Create bar plot
-    plt.figure(figsize=(14, 7))
+    plt.figure(figsize=(16, 8))
     ax = sns.barplot(
         data=top_acquisitions_per_acquirer, 
         x="acquisition_price_usd_billions", 
@@ -436,152 +436,126 @@ def run_analysis(engine):
 
 def insert_data(engine):
     """
-    Allows user to insert data into one of the database tables interactively.
+    Allows user to insert data into one of the database tables interactively in Streamlit.
     """
+    st.subheader("Insert Data into Database")
+
     # Fetch available tables dynamically
     query_tables = "SHOW TABLES"
     tables_df = pd.read_sql(query_tables, engine)
-    tables = {str(i+1): table for i, table in enumerate(tables_df.iloc[:, 0])}  # Fixed empty dictionary issue
 
-    if not tables:
-        print("No tables found in the database.")
+    if tables_df.empty:
+        st.error("No tables found in the database.")
         return
 
-    # Display available tables
-    print("Select the table you want to insert data into:")
-    for key, value in tables.items():
-        print(f"{key}. {value}")
+    # Select table with Streamlit dropdown
+    table_name = st.selectbox("Select the table to insert data:", tables_df.iloc[:, 0])
 
-    choice = input("Enter the number of the table: ").strip()
-
-    if choice not in tables:
-        print("Invalid choice. Please try again.")
+    if not table_name:
         return
-    
-    table_name = tables[choice]
 
     # Get table schema
     query = f"DESCRIBE {table_name}"
     df_schema = pd.read_sql(query, engine)
 
-    # Prompt user for input based on table schema
+    # Collect user inputs for each column
+    st.subheader(f"Enter Data for `{table_name}`")
     data = {}
-    print(f"\nEntering data for table: {table_name}")
 
     for index, row in df_schema.iterrows():
         column_name = row["Field"]
         column_type = row["Type"]
-        
+
         # Skip auto-increment primary key columns
         if "auto_increment" in row["Extra"]:
             continue
 
-        while True:
-            user_input = input(f"Enter value for {column_name} ({column_type}): ").strip()
+        # Use Streamlit inputs based on column type
+        if "int" in column_type or "bigint" in column_type:
+            data[column_name] = st.number_input(f"{column_name} ({column_type})", step=1, format="%d")
+        elif "float" in column_type or "decimal" in column_type:
+            data[column_name] = st.number_input(f"{column_name} ({column_type})", format="%.2f")
+        elif "date" in column_type.lower():
+            data[column_name] = st.text_input(f"{column_name} (YYYY-MM-DD)")
+        elif "bool" in column_type or column_type.lower() == "tinyint(1)":
+            data[column_name] = st.checkbox(f"{column_name} (Check = True, Uncheck = False)")
+        else:
+            data[column_name] = st.text_input(f"{column_name}")
 
-            try:
-                # Convert input to correct type
-                if "int" in column_type or "bigint" in column_type:
-                    data[column_name] = int(user_input)
-                elif "float" in column_type or "decimal" in column_type:
-                    data[column_name] = float(user_input)
-                elif "date" in column_type.lower():
-                    data[column_name] = user_input  # Ensure input follows YYYY-MM-DD format
-                elif "bool" in column_type or column_type.lower() == "tinyint(1)":
-                    data[column_name] = 1 if user_input.lower() in ["1", "true", "yes"] else 0
-                else:
-                    data[column_name] = user_input  # Default to string
-                break  # Exit loop if input is valid
-            except ValueError:
-                print(f"Invalid input format for {column_name}. Expected {column_type}. Please try again.")
+    # Insert Data Button
+    if st.button(f"Insert Data into `{table_name}`"):
+        try:
+            # Create SQL INSERT statement
+            columns = ", ".join(data.keys())
+            values_placeholders = ", ".join([f":{col}" for col in data.keys()])
+            sql = text(f"INSERT INTO {table_name} ({columns}) VALUES ({values_placeholders})")
 
-    # Confirm deletion
-    confirm = input(f"\n Are you sure you want to insert these entries? (yes/no): ").strip().lower()
-    
-    if confirm != 'yes':
-        print("Deletion cancelled.")
-        return
-    
-    # Create SQL INSERT statement
-    columns = ", ".join(data.keys())
-    values_placeholders = ", ".join([f":{col}" for col in data.keys()])
-    sql = text(f"INSERT INTO {table_name} ({columns}) VALUES ({values_placeholders})")
+            # Execute insertion
+            with engine.connect() as conn:
+                conn.execute(sql, data)
+                conn.commit()
 
-    # Execute insertion
-    try:
-        with engine.connect() as conn:
-            conn.execute(sql, data)
-            conn.commit()
-        print(f"\n Data successfully inserted into `{table_name}`!")
-    except Exception as e:
-        print(f"\n Error inserting data: {e}")
+            st.success(f"Data successfully inserted into `{table_name}`!")
+        except Exception as e:
+            st.error(f"Error inserting data: {e}")
+
 
 def delete_entry(engine):
     """
-    Allows user to delete an entry from a selected table based on 'symbol' or 'company_name'.
+    Allows user to delete an entry from a selected table based on 'symbol' or 'company_name' in Streamlit.
     """
+    st.subheader("Delete Data from Database")
+
     # Fetch available tables dynamically
     query_tables = "SHOW TABLES"
     tables_df = pd.read_sql(query_tables, engine)
-    tables = {str(i+1): table for i, table in enumerate(tables_df.iloc[:, 0])}
 
-    if not tables:
-        print("No tables found in the database.")
+    if tables_df.empty:
+        st.error("No tables found in the database.")
         return
 
-    # Display available tables
-    print("\nSelect the table you want to delete data from:")
-    for key, value in tables.items():
-        print(f"{key}. {value}")
+    # Select table from dropdown
+    table_name = st.selectbox("Select the table to delete data from:", tables_df.iloc[:, 0])
 
-    choice = input("\nEnter the number of the table: ").strip()
-    
-    if choice not in tables:
-        print("Invalid choice. Please try again.")
+    if not table_name:
         return
-    
-    table_name = tables[choice]
 
-    # Ensure the selected table has either 'symbol' or 'company_name'
     query = f"DESCRIBE {table_name}"
     df_schema = pd.read_sql(query, engine)
     valid_columns = [col for col in ["symbol", "company_name"] if col.lower() in map(str.lower, df_schema["Field"].values)]
 
     if not valid_columns:
-        print(f"\nThe table `{table_name}` does not have 'symbol' or 'company_name'. Deletion is not allowed.")
+        st.error(f"The table `{table_name}` does not have 'symbol' or 'company_name'. Deletion is not allowed.")
         return
 
-    # Ask user for the identifier
-    print("\nYou can delete by either 'symbol' or 'company_name'.")
-    
-    while True:
-        column_name = input(f"Enter 'symbol' or 'company_name' to filter by: ").strip()
-        if column_name.lower() in map(str.lower, valid_columns):
-            # Get the correct case from the database
-            column_name = next(col for col in valid_columns if col.lower() == column_name.lower())
-            break
-        print("Invalid choice. Please enter either 'symbol' or 'company_name'.")
+    # Select column name dynamically
+    column_name = st.selectbox("Select the column to filter by:", valid_columns)
 
-    # Ask for the value to match
-    value = input(f"Enter the value for `{column_name}` (e.g., 'AAPL' or 'Apple Inc.'): ").strip()
+    # Enter the value to delete
+    value = st.text_input(f"Enter the value for `{column_name}` (e.g., 'AAPL' or 'Apple Inc.'):")
 
-    # Confirm deletion
-    confirm = input(f"\nAre you sure you want to delete entries where `{column_name}` = '{value}' in `{table_name}`? (yes/no): ").strip().lower()
-    if confirm != 'yes':
-        print("Deletion cancelled.")
-        return
+    # Confirm deletion with a button
+    if st.button(f"Delete Entries from `{table_name}`"):
+        if not value:
+            st.warning("Please enter a value to delete.")
+            return
 
-    # Prepare and execute the DELETE statement
-    sql = text(f"DELETE FROM {table_name} WHERE LOWER({column_name}) = LOWER(:value)")
-    params = {'value': value}
+        # Prepare and execute the DELETE statement
+        sql = text(f"DELETE FROM {table_name} WHERE LOWER({column_name}) = LOWER(:value)")
+        params = {'value': value}
 
-    try:
-        with engine.connect() as conn:
-            result = conn.execute(sql, params)
-            conn.commit()
-        print(f"\n{result.rowcount} record(s) deleted from `{table_name}` where `{column_name}` = '{value}'.")
-    except Exception as e:
-        print(f"\nError deleting data: {e}")
+        try:
+            with engine.connect() as conn:
+                result = conn.execute(sql, params)
+                conn.commit()
+            
+            if result.rowcount > 0:
+                st.success(f"{result.rowcount} record(s) deleted from `{table_name}` where `{column_name}` = '{value}'.")
+            else:
+                st.warning(f"No records found matching `{column_name}` = '{value}'.")
+        except Exception as e:
+            st.error(f"Error deleting data: {e}")
+
 
 def main():
     print("sql_functions.py loaded. Use this in a script or application.")
