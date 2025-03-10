@@ -209,16 +209,18 @@ def top_acquisitions(engine):
     top_acquisitions_per_acquirer = acquirer_table.groupby("acquirer").apply(
         lambda x: x.nlargest(3, "acquisition_price_usd_billions")).reset_index(drop=True)
 
-    # Assign colors for the acquirers
-    acquirer_colors = [company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"]]
+    # Assign colors for the acquirers 
+    acquirer_colors = {acquirer: company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"].unique()}
 
     # Create bar plot
     plt.figure(figsize=(14, 7))
-    ax = sns.barplot(data=top_acquisitions_per_acquirer, 
-                     x="acquisition_price_usd_billions", 
-                     y="acquired_company", 
-                     hue="acquirer", 
-                     palette=acquirer_colors)
+    ax = sns.barplot(
+        data=top_acquisitions_per_acquirer, 
+        x="acquisition_price_usd_billions", 
+        y="acquired_company", 
+        hue="acquirer", 
+        palette=acquirer_colors
+    )
 
     # Rotate x-axis labels for better readability
     plt.xticks(rotation=45, ha="right")
@@ -242,7 +244,6 @@ def top_acquisitions(engine):
     # Display plot
     st.pyplot(plt.gcf())
 
-    return df 
 
 #Acquisition prices in usd by acquirer
 def acquisition_price_by_acquirer(engine):
