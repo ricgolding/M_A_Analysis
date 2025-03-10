@@ -27,6 +27,10 @@ symbol_to_company = {
     "STT": "State Street"
 }
 
+#Set Streamlit dark mode background
+DARK_BG = "#0E1117"
+WHITE_TEXT = "white"
+
 #Set up connection and password for SQL
 def sql_setup():
     # Get database configuration from st.secrets
@@ -49,18 +53,19 @@ def total_acquisitions_by_company(engine):
     """
     df = pd.read_sql(query, engine)
     colors = [company_colors[acquirer] for acquirer in df['acquirer']]
+
+    fig, ax = plt.subplots(figsize=(14, 8), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
+
+    df.plot(kind='bar', x='acquirer', y='total_acquisitions', color=colors, ax=ax)
     
-    ax = df.plot(kind='bar', 
-                 x='acquirer', 
-                 y='total_acquisitions', 
-                 color=colors, 
-                 figsize=(10,6), 
-                 title='Total Acquisitions per Company')
-    
-    plt.xlabel('Acquirer')
-    plt.ylabel('Total Acquisitions')
-    plt.xticks(rotation=45)
-    st.pyplot(plt.gcf())
+    plt.xlabel('Acquirer', color=WHITE_TEXT)
+    plt.ylabel('Total Acquisitions', color=WHITE_TEXT)
+    plt.xticks(rotation=45, color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+    plt.title('Total Acquisitions per Company', color=WHITE_TEXT)
+
+    st.pyplot(fig)
     return df
 
 # Acquisitions per year with acquirers included
@@ -74,19 +79,23 @@ def acquisitions_per_year(engine):
     df = pd.read_sql(query, engine)
     pivot_df = df.pivot(index='acquisition_year', columns='acquirer', values='total_acquisitions').fillna(0)
 
-    # Assign colors for the stacked bar chart
     acquirer_colors = [company_colors[acquirer] for acquirer in pivot_df.columns]
-    
-    ax = pivot_df.plot(kind='bar', stacked=False, figsize=(14, 7), width=0.8, color=acquirer_colors)
-    
-    plt.title('Acquisitions per Year by Acquirer')
-    plt.xlabel('Year')
-    plt.ylabel('Total Acquisitions')
-    plt.xticks(rotation=45, ha="right")
+
+    fig, ax = plt.subplots(figsize=(16, 9), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
+
+    pivot_df.plot(kind='bar', stacked=False, width=0.8, color=acquirer_colors, ax=ax)
+
+    plt.xlabel('Year', color=WHITE_TEXT)
+    plt.ylabel('Total Acquisitions', color=WHITE_TEXT)
+    plt.title('Acquisitions per Year by Acquirer', color=WHITE_TEXT)
+    plt.xticks(rotation=45, color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
     plt.grid(axis="y", linestyle="--", alpha=0.7)
-    
-    st.pyplot(plt.gcf())
+
+    st.pyplot(fig)
     return df
+
 
 # Most active acquirer (top 1)
 def most_active_acquirer(engine):
@@ -135,27 +144,23 @@ def maturity_status(engine):
         FROM mergers_acquisitions
     """
     df = pd.read_sql(query, engine)
-
-    # Group by acquirer and maturity status, then count occurrences
     maturity_counts = df.groupby(["acquirer", "matured"]).size().unstack()
 
-    # Create a stacked bar chart
-    maturity_counts.plot(kind="bar", stacked=True, figsize=(12, 6), colormap="tab10")
+    fig, ax = plt.subplots(figsize=(14, 8), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
 
-    # Add labels and title
-    plt.xlabel("Acquirer")
-    plt.ylabel("Number of Acquisitions")
-    plt.title("Preference for Matured vs. Non-Matured Companies by Acquirer")
-    plt.legend(["Not Matured (<10 years)", "Matured (10+ years)"], title="Company Age at Acquisition")
+    maturity_counts.plot(kind="bar", stacked=True, colormap="tab10", ax=ax)
 
-    # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Acquirer", color=WHITE_TEXT)
+    plt.ylabel("Number of Acquisitions", color=WHITE_TEXT)
+    plt.title("Preference for Matured vs. Non-Matured Companies by Acquirer", color=WHITE_TEXT)
+    plt.xticks(rotation=45, color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+    plt.legend(["Not Matured (<10 years)", "Matured (10+ years)"], title="Company Age at Acquisition", facecolor=DARK_BG, labelcolor=WHITE_TEXT)
     plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-    # Show plot
-    st.pyplot(plt.gcf())
-
-    return df  
+    st.pyplot(fig)
+    return df
 
 #Industry distribution by Acquirer
 def industry_distribution(engine):
@@ -165,31 +170,25 @@ def industry_distribution(engine):
     """
     df = pd.read_sql(query, engine)
 
-    # Create a grouped bar chart (one per acquirer)
     for acquirer in df["acquirer"].unique():
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 7), facecolor=DARK_BG)
         df_subset = df[df["acquirer"] == acquirer]
-        
-        # Count the number of acquisitions per industry
         industry_counts = df_subset["industry"].value_counts()
-        
-        # Apply company-specific color
-        color = company_colors[acquirer]
 
-        # Plot as a bar chart
+        color = company_colors[acquirer]
         industry_counts.plot(kind="bar", color=color, alpha=0.75)
 
-        # Formatting
-        plt.title(f"Industry Distribution of Acquisitions for {acquirer}")
-        plt.xlabel("Industry")
-        plt.ylabel("Number of Acquisitions")
-        plt.xticks(rotation=45, ha="right")  
+        plt.title(f"Industry Distribution for {acquirer}", color=WHITE_TEXT)
+        plt.xlabel("Industry", color=WHITE_TEXT)
+        plt.ylabel("Number of Acquisitions", color=WHITE_TEXT)
+        plt.xticks(rotation=45, ha="right", color=WHITE_TEXT)
+        plt.yticks(color=WHITE_TEXT)
         plt.grid(axis="y", linestyle="--", alpha=0.7)
-        
-        # Show the plot
+
         st.pyplot(plt.gcf())
         
     return df  
+
 
 #Most expensive acquisitions by acquirer
 def top_acquisitions(engine):
@@ -198,51 +197,32 @@ def top_acquisitions(engine):
         FROM mergers_acquisitions
     """
     df = pd.read_sql(query, engine)
-
-    # Convert acquisition price to billions
     df["acquisition_price_usd_billions"] = df["acquisition_price_usd"] / 1e9
 
-    # Group by acquirer and acquired company, summing the acquisition price
     acquirer_table = df.groupby(['acquirer', 'acquired_company', 'acquisition_year'], as_index=False)['acquisition_price_usd_billions'].sum()
+    top_acquisitions_per_acquirer = acquirer_table.groupby("acquirer").apply(lambda x: x.nlargest(3, "acquisition_price_usd_billions")).reset_index(drop=True)
 
-    # Select the top 3 acquisitions for each acquirer
-    top_acquisitions_per_acquirer = acquirer_table.groupby("acquirer").apply(
-        lambda x: x.nlargest(3, "acquisition_price_usd_billions")).reset_index(drop=True)
+    acquirer_colors = [company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"]]
 
-    # Assign colors for the acquirers 
-    acquirer_colors = {acquirer: company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"].unique()}
+    fig, ax = plt.subplots(figsize=(18, 9), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
 
-    # Create bar plot
-    plt.figure(figsize=(16, 8))
-    ax = sns.barplot(
-        data=top_acquisitions_per_acquirer, 
-        x="acquisition_price_usd_billions", 
-        y="acquired_company", 
-        hue="acquirer", 
-        palette=acquirer_colors
-    )
+    sns.barplot(data=top_acquisitions_per_acquirer, x="acquisition_price_usd_billions", y="acquired_company", hue="acquirer", palette=acquirer_colors, ax=ax)
 
-    # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha="right")
+    plt.xticks(rotation=45, ha="right", color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+    plt.xlabel("Acquisition Price (in Billion USD)", color=WHITE_TEXT)
+    plt.ylabel("Acquired Company", color=WHITE_TEXT)
+    plt.title("Top 3 Acquisitions by Acquirer", color=WHITE_TEXT)
 
-    # Add labels and title
-    plt.title("Top 3 Acquisitions by Acquirer")
-    plt.xlabel("Acquisition Price (in Billion USD)")
-    plt.ylabel("Acquired Company")
-
-    # Add value labels to bars
     for p in ax.patches:
         width = p.get_width()  
         if width > 0:  
-            ax.annotate(f"${width:,.2f}B",  
-                        (p.get_x() + width + 0.2, p.get_y() + p.get_height() / 2),  
-                        ha='left', va='center', fontsize=9, fontweight='bold', color='black')
+            ax.annotate(f"${width:,.2f}B", (p.get_x() + width + 0.2, p.get_y() + p.get_height() / 2), ha='left', va='center', fontsize=9, fontweight='bold', color=WHITE_TEXT)
 
-    # Show legend
-    plt.legend(title="Acquirer", bbox_to_anchor=(1, 1))
+    plt.legend(title="Acquirer", bbox_to_anchor=(1, 1), loc="upper left", labelcolor=WHITE_TEXT, facecolor=DARK_BG)
 
-    # Display plot
-    st.pyplot(plt.gcf())
+    st.pyplot(fig)
 
 
 #Acquisition prices in usd by acquirer
@@ -257,14 +237,18 @@ def acquisition_price_by_acquirer(engine):
 
     colors = [company_colors[acquirer] for acquirer in df['acquirer']]
 
-    plt.figure(figsize=(10, 6))
-    sns.barplot(x="acquirer", y="total_acquisition_price_usd", data=df, palette=colors)
+    fig, ax = plt.subplots(figsize=(14, 8), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
 
-    plt.title("Acquisition Price by Acquirer")
-    plt.xlabel("Acquirer")
-    plt.ylabel("Acquisition Price (in billion USD)")
-    plt.xticks(rotation=45)
-    st.pyplot(plt.gcf())
+    sns.barplot(x="acquirer", y="total_acquisition_price_usd", data=df, palette=colors, ax=ax)
+
+    plt.xlabel("Acquirer", color=WHITE_TEXT)
+    plt.ylabel("Acquisition Price (in Billion USD)", color=WHITE_TEXT)
+    plt.title("Acquisition Price by Acquirer", color=WHITE_TEXT)
+    plt.xticks(rotation=45, color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+
+    st.pyplot(fig)
 
 #Net income vs number of acquisitions
 def net_income_vs_acquisitions(engine):
@@ -283,21 +267,26 @@ def net_income_vs_acquisitions(engine):
 
     df_income["date"] = pd.to_datetime(df_income["date"])
     df_income_latest = df_income.sort_values(by="date", ascending=False).drop_duplicates(subset=["symbol"])
-    
+
     df_merged = pd.merge(df_income_latest, df_ma, on="symbol", how="left").fillna(0)
     df_merged["netIncome_billion"] = df_merged["netIncome"] / 1e9
 
-    plt.figure(figsize=(10, 6))
-    palette = {sym: company_colors[symbol_to_company[sym]] for sym in df_merged["symbol"].unique()}
+    fig, ax = plt.subplots(figsize=(14, 8), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
 
-    sns.scatterplot(data=df_merged, x="netIncome_billion", y="num_acquisitions", hue="symbol", style="symbol", palette=palette, s=150)
-    
+    palette = {sym: company_colors[symbol_to_company[sym]] for sym in df_merged["symbol"].unique()}
+    sns.scatterplot(data=df_merged, x="netIncome_billion", y="num_acquisitions", hue="symbol", style="symbol", palette=palette, s=150, ax=ax)
+
     plt.xscale("log")
-    plt.title("Net Income vs. Number of Acquisitions by Acquirer")
-    plt.xlabel("Net Income (in Billions USD, Log Scale)")
-    plt.ylabel("Number of M&A Deals")
-    plt.legend(title="Company", bbox_to_anchor=(1, 1))
-    st.pyplot(plt.gcf())
+    plt.xlabel("Net Income (in Billions USD, Log Scale)", color=WHITE_TEXT)
+    plt.ylabel("Number of M&A Deals", color=WHITE_TEXT)
+    plt.title("Net Income vs. Number of Acquisitions by Acquirer", color=WHITE_TEXT)
+    plt.xticks(color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+    plt.legend(title="Company", bbox_to_anchor=(1, 1), facecolor=DARK_BG, labelcolor=WHITE_TEXT)
+
+    st.pyplot(fig)
+    return df
 
 #Average pricing by maturity status
 def avg_price_by_maturity(engine):
@@ -307,18 +296,21 @@ def avg_price_by_maturity(engine):
         GROUP BY matured
     """
     df = pd.read_sql(query, engine)
-
-    # Convert to billions
     df["avg_acquisition_price_usd"] = df["avg_acquisition_price_usd"] / 1e9
 
-    # Plot
-    plt.figure(figsize=(8, 5))
-    sns.barplot(x=df["matured"].astype(str), y=df["avg_acquisition_price_usd"], palette="coolwarm")
-    plt.xlabel("Maturity Status (0 = Non-Matured, 1 = Matured)")
-    plt.ylabel("Average Acquisition Price (in Billions USD)")
-    plt.title("Are Matured Companies More Expensive?")
-    plt.xticks([0, 1], ["Not Matured (<10 years)", "Matured (10+ years)"])
-    st.pyplot(plt.gcf())
+    fig, ax = plt.subplots(figsize=(12, 7), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
+
+    sns.barplot(x=df["matured"].astype(str), y=df["avg_acquisition_price_usd"], palette="coolwarm", ax=ax)
+
+    plt.xlabel("Maturity Status (0 = Non-Matured, 1 = Matured)", color=WHITE_TEXT)
+    plt.ylabel("Average Acquisition Price (in Billions USD)", color=WHITE_TEXT)
+    plt.title("Are Matured Companies More Expensive?", color=WHITE_TEXT)
+    plt.xticks([0, 1], ["Not Matured (<10 years)", "Matured (10+ years)"], color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+
+    st.pyplot(fig)
+    return df
 
 #M&A spending as a percentage of revenue
 def ma_spending_vs_revenue(engine):
@@ -343,18 +335,24 @@ def ma_spending_vs_revenue(engine):
     df_analysis = pd.merge(df_ma, df_income, on=["symbol", "year"], how="left")
     df_analysis["ma_spending_to_revenue"] = df_analysis["total_ma_spending"] / df_analysis["avg_revenue"]
 
-    plt.figure(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(14, 8), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
+
     for symbol in df_analysis["symbol"].unique():
         subset = df_analysis[df_analysis["symbol"] == symbol]
-        company = symbol_to_company[symbol]  
+        company = symbol_to_company[symbol]
         plt.plot(subset["year"], subset["ma_spending_to_revenue"], marker="o", label=symbol, color=company_colors[company])
 
-    plt.title("M&A Spending Relative to Revenue by Acquirer (Since 2020)")
-    plt.xlabel("Year")
-    plt.ylabel("M&A Spending / Revenue Ratio")
-    plt.legend(title="Acquirer", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.xlabel("Year", color=WHITE_TEXT)
+    plt.ylabel("M&A Spending / Revenue Ratio", color=WHITE_TEXT)
+    plt.title("M&A Spending Relative to Revenue by Acquirer (Since 2020)", color=WHITE_TEXT)
+    plt.xticks(color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+    plt.legend(title="Acquirer", bbox_to_anchor=(1.05, 1), loc="upper left", facecolor=DARK_BG, labelcolor=WHITE_TEXT)
     plt.grid(True)
-    st.pyplot(plt.gcf())
+
+    st.pyplot(fig)
+    return df
 
 
 #Stock price comparison as of last time data was pulled
@@ -369,19 +367,22 @@ def stock_price_comparison(engine):
 
     colors = [company_colors[symbol_to_company[symbol]] for symbol in df['symbol']]
 
-    plt.figure(figsize=(10, 6))
-    ax = sns.barplot(data=df, x="symbol", y="avg_price", palette=colors)
+    fig, ax = plt.subplots(figsize=(14, 8), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
+
+    sns.barplot(data=df, x="symbol", y="avg_price", palette=colors, ax=ax)
 
     for p in ax.patches:
-        ax.annotate(f"${p.get_height():,.2f}", 
-                    (p.get_x() + p.get_width() / 2., p.get_height()), 
-                    ha='center', va='bottom', fontsize=10, color='black')
+        ax.annotate(f"${p.get_height():,.2f}", (p.get_x() + p.get_width() / 2., p.get_height()), ha='center', va='bottom', fontsize=10, color=WHITE_TEXT)
 
-    plt.title(f"Stock Price Comparison of Acquiring Companies (As of {last_update})")
-    plt.xlabel("Company")
-    plt.ylabel("Stock Price (USD)")
-    plt.xticks(rotation=45)
-    st.pyplot(plt.gcf())
+    plt.xlabel("Company", color=WHITE_TEXT)
+    plt.ylabel("Stock Price (USD)", color=WHITE_TEXT)
+    plt.title(f"Stock Price Comparison of Acquiring Companies (As of {last_update})", color=WHITE_TEXT)
+    plt.xticks(rotation=45, color=WHITE_TEXT)
+    plt.yticks(color=WHITE_TEXT)
+
+    st.pyplot(fig)
+    return df
 
 
 #Run any of the above analysis function.
