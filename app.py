@@ -1,5 +1,5 @@
 import streamlit as st
-import sql_functions as sql  # Import the SQL functions
+import streamlit_functions as sql  # Import the SQL functions
 
 # Streamlit App Title
 st.title("M&A Analysis Dashboard")
