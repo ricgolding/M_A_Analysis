@@ -216,25 +216,22 @@ def top_acquisitions(engine):
     acquirer_colors = [company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"]]
 
     # Create bar plot
-    fig, ax = plt.subplots(figsize=(16, 8), facecolor="#0E1117")
-    ax.set_facecolor("#0E1117") 
-
-    sns.barplot(
+    plt.figure(figsize=(16, 8))
+    ax = sns.barplot(
         data=top_acquisitions_per_acquirer, 
         x="acquisition_price_usd_billions", 
         y="acquired_company", 
         hue="acquirer", 
-        palette=acquirer_colors 
+        palette=acquirer_colors  # 🔹 FIXED: Directly mapped list of colors
     )
 
     # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45, ha="right", color="white")
-    plt.yticks(color="white")
+    plt.xticks(rotation=45, ha="right")
 
     # Add labels and title
-    plt.title("Top 3 Acquisitions by Acquirer", color="white")
-    plt.xlabel("Acquisition Price (in Billion USD)", color="white")
-    plt.ylabel("Acquired Company", color="white")
+    plt.title("Top 3 Acquisitions by Acquirer")
+    plt.xlabel("Acquisition Price (in Billion USD)")
+    plt.ylabel("Acquired Company")
 
     # Add value labels to bars
     for p in ax.patches:
@@ -242,13 +239,14 @@ def top_acquisitions(engine):
         if width > 0:  
             ax.annotate(f"${width:,.2f}B",  
                         (p.get_x() + width + 0.2, p.get_y() + p.get_height() / 2),  
-                        ha='left', va='center', fontsize=9, fontweight='bold', color='white')
+                        ha='left', va='center', fontsize=9, fontweight='bold', color='black')
 
     # Show legend with acquirers
-    plt.legend(title="Acquirer", bbox_to_anchor=(1, 1), loc="upper left", labelcolor="white", facecolor="#0E1117") 
+    plt.legend(title="Acquirer", bbox_to_anchor=(1, 1), loc="upper left")
 
     # Display plot
-    st.pyplot(fig)
+    st.pyplot(plt.gcf())
+
 
 
 #Acquisition prices in usd by acquirer
