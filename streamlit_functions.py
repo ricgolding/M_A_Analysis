@@ -566,7 +566,7 @@ def main():
     """
     Main function to execute SQL-based analysis and operations.
     """
-    engine = sql_setup()  # Establish SQL connection
+    engine = sql_setup()
 
     print("\nM&A Analysis Options:")
     print("1: Run Data Analysis")
@@ -589,5 +589,6 @@ def main():
         else:
             print("Invalid choice. Please try again.")
 
+#Only run main() when executing streamlit_functions.py directly
 if __name__ == "__main__":
     main()
