@@ -563,32 +563,7 @@ def delete_entry(engine):
         print(f"\nError deleting data: {e}")
 
 def main():
-    """
-    Main function to execute SQL-based analysis and operations.
-    """
-    engine = sql_setup()
+    print("sql_functions.py loaded. Use this in a script or application.")
 
-    print("\nM&A Analysis Options:")
-    print("1: Run Data Analysis")
-    print("2: Insert Data")
-    print("3: Delete Entry")
-    print("4: Exit")
-
-    while True:
-        choice = input("Enter your choice (1-4): ").strip()
-
-        if choice == '1':
-            run_analysis(engine)
-        elif choice == '2':
-            insert_data(engine)
-        elif choice == '3':
-            delete_entry(engine)
-        elif choice == '4':
-            print("Exiting program.")
-            break
-        else:
-            print("Invalid choice. Please try again.")
-
-#Only run main() when executing streamlit_functions.py directly
 if __name__ == "__main__":
     main()
