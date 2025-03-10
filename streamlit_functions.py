@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sqlalchemy import text
 import getpass  # To get the password without showing the input
+import streamlit as st
 import os  # Use environment variables instead of getpass
 
 #Set up connection and password for SQL
