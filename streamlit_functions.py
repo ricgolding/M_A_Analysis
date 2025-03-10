@@ -6,14 +6,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sqlalchemy import text
 import getpass  # To get the password without showing the input
+import os  # Use environment variables instead of getpass
 
 #Set up connection and password for SQL
 def sql_setup():
-    password = getpass.getpass("Please add your SQL password: ")
+    password = os.getenv("DB_PASSWORD")  # Get password from environment variable
     bd = "mergers_acquisitions"
-    connection_string = 'mysql+pymysql://root:' + password + '@localhost/'+bd
+    connection_string = f"mysql+pymysql://root:{password}@localhost/{bd}"
     engine = create_engine(connection_string)
     return engine
+
 
 # Total acquisitions per company
 def total_acquisitions_by_company(engine):
