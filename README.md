@@ -90,17 +90,24 @@ streamlit run app.py
 ├── 📂 .streamlit
 │   ├── secrets.toml  # MySQL credentials
 ├── 📂 data
-│   ├── tracxn_mna.xlsx  # Raw dataset from Tracxn
+│   ├── 📂 clean
+│   │   ├── income_statement_data.csv
+│   │   ├── mergers_acquisitions_data.csv
+│   │   ├── profile_data.csv
+│   │   ├── stock_data.csv
+│   ├── 📂 raw
+│   │   ├── tracxn_mna.xlsx  # Renamed from ma-activity-tracxn.xlsx
 ├── 📂 notebooks
-│   ├── data_cleaning.ipynb  # Cleaning & preprocessing
-│   ├── eda.ipynb  # Exploratory Data Analysis
+│   ├── cleaning.ipynb  # Data cleaning & preprocessing
+│   ├── EDA.ipynb  # Exploratory Data Analysis
 │   ├── statistical_testing.ipynb  # Hypothesis testing & statistical analysis
 ├── 📂 src
 │   ├── streamlit_functions.py  # M&A analysis functions for Streamlit
-│   ├── sql_setup.py  # Database connection setup
+│   ├── sql_functions.py  # Database query functions
 ├── app.py  # Streamlit application entry point
 ├── requirements.txt  # Python dependencies
 ├── README.md  # Project documentation
+
 ```
 
 ---
