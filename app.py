@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit_functions as sql  # Import the SQL functions
 
-# ✅ Streamlit page settings (MUST be the first command)
+#Streamlit page settings
 st.set_page_config(page_title="M&A Analysis", layout="wide")
 
 # Streamlit App Title
@@ -10,12 +10,13 @@ st.write("Welcome to the M&A Analysis Streamlit App for DA Ironhack 2025.")
 
 # Company logos
 company_logos = {
-    "Berkshire Hathaway": "berkshire.png",
-    "BlackRock": "blackrock.jpg",
-    "Goldman Sachs": "goldman.png",
-    "JPMorgan Chase": "jpmorgan.png",
-    "State Street": "statestreet.png"
+    "Berkshire Hathaway": "https://raw.githubusercontent.com/ricgolding/M_A_Analysis/main/images/berkshire.png",
+    "BlackRock": "https://raw.githubusercontent.com/ricgolding/M_A_Analysis/main/images/blackrock.jpg",
+    "Goldman Sachs": "https://raw.githubusercontent.com/ricgolding/M_A_Analysis/main/images/goldman.png",
+    "JPMorgan Chase": "https://raw.githubusercontent.com/ricgolding/M_A_Analysis/main/images/jpmorgan.png",
+    "State Street": "https://raw.githubusercontent.com/ricgolding/M_A_Analysis/main/images/statestreet.png"
 }
+
 
 # Display logos in a row
 st.markdown("### **Companies in this Analysis**")
