@@ -2,10 +2,9 @@ import streamlit as st
 import streamlit_functions as sql  # Import the SQL functions
 
 # Streamlit App Title
+st.set_page_config(layout="wide")
 st.title("M&A Analysis Dashboard")
 st.write("Welcome to the M&A Analysis Streamlit App for DA Ironhack 2025.")
-
-st.set_page_config(layout="wide")
 
 # Company logos
 company_logos = {
