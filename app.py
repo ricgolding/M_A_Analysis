@@ -1,8 +1,10 @@
 import streamlit as st
 import streamlit_functions as sql  # Import the SQL functions
 
+#Streamlit page settings (MUST be the first command)
+st.set_page_config(page_title="M&A Analysis", layout="wide")
+
 # Streamlit App Title
-st.set_page_config(layout="wide")
 st.title("M&A Analysis Dashboard")
 st.write("Welcome to the M&A Analysis Streamlit App for DA Ironhack 2025.")
 
@@ -34,6 +36,7 @@ with col4:
 
 with col5:
     st.image(company_logos["State Street"], caption="State Street", use_column_width=True)
+
 # Create a sidebar menu
 option = st.sidebar.selectbox(
     "Choose an action:",
