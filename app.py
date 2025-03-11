@@ -17,26 +17,22 @@ company_logos = {
     "State Street": "https://raw.githubusercontent.com/ricgolding/M_A_Analysis/main/images/statestreet.png"
 }
 
-
-# Display logos in a row
-st.markdown("### **Companies in this Analysis**")
-
 col1, col2, col3, col4, col5 = st.columns(5)  # Creates 5 equal columns
 
 with col1:
-    st.image(company_logos["Berkshire Hathaway"], caption="Berkshire Hathaway", use_container_width=True)
+    st.image(company_logos["Berkshire Hathaway"], use_container_width=True)
 
 with col2:
-    st.image(company_logos["BlackRock"], caption="BlackRock", use_container_width=True)
+    st.image(company_logos["BlackRock"],  use_container_width=True)
 
 with col3:
-    st.image(company_logos["Goldman Sachs"], caption="Goldman Sachs", use_container_width=True)
+    st.image(company_logos["Goldman Sachs"], use_container_width=True)
 
 with col4:
-    st.image(company_logos["JPMorgan Chase"], caption="JPMorgan Chase", use_container_width=True)
+    st.image(company_logos["JPMorgan Chase"], use_container_width=True)
 
 with col5:
-    st.image(company_logos["State Street"], caption="State Street", use_container_width=True)
+    st.image(company_logos["State Street"], use_container_width=True)
 
 # Create a sidebar menu
 option = st.sidebar.selectbox(
