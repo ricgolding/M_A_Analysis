@@ -57,7 +57,8 @@ def total_acquisitions_by_company(engine):
                  y='total_acquisitions', 
                  color=colors, 
                  figsize=(10,6), 
-                 title='Total Acquisitions per Company')
+                 title='Total Acquisitions per Company',
+                legend=False)
     
     plt.xlabel('Acquirer')
     plt.ylabel('Total Acquisitions')
