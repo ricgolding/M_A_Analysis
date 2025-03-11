@@ -5,8 +5,8 @@ This project is a **comprehensive data analysis of Mergers & Acquisitions (M&A)*
 
 Additionally, an **interactive dashboard was developed in Streamlit** to enable **data exploration and visualization**. Further, **Tableau visualizations** provide additional insights.
 
-🔗 **Live Streamlit Dashboard**: [M&A Analysis Dashboard](https://m-a-analysis-app.streamlit.app/)  
-📊 **Tableau Visualizations**: *(not available yet)*
+🔗 **Live Streamlit Dashboard**: [M&A Streamlit](https://m-a-analysis-app.streamlit.app/)  
+📊 **Tableau Visualizations**: *[M&A Tableau](https://public.tableau.com/app/profile/ricardo.golding/viz/mergers_acquisitions/AcquisitionTrends?publish=yes)*
 
 ---
 
@@ -29,8 +29,8 @@ Additionally, an **interactive dashboard was developed in Streamlit** to enable 
 
 #### 🛠 **User Interaction**
 ✅ **Run Analysis** - identifies acquisition trends and financial strategy via **MySQL**. 
-✅ **Insert new M&A data** directly into MySQL via a **Streamlit form**.  
-✅ **Delete existing M&A records** based on **company name or symbol**.   
+✅ **Insert new M&A data** - directly into MySQL via a **Streamlit form**.  
+✅ **Delete existing M&A records** - based on **company name or symbol**.   
 
 ### **Interactive Tableau Dashboard**
 #### 📊 **M&A Visualizations & Insights** 

@@ -9,7 +9,6 @@ import getpass  # To get the password without showing the input
 import streamlit as st
 import os  # Use environment variables instead of getpass
 
-
 company_colors = {
     "Berkshire Hathaway": "#4B0082",
     "BlackRock":          "#000000",
@@ -221,14 +220,14 @@ def top_acquisitions(engine):
     #Create a Dictionary Mapping Acquirer to Color
     acquirer_palette = {acquirer: company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"].unique()}
 
-    fig, ax = plt.subplots(figsize=(16, 8))  # No dark mode, uses default white background
+    fig, ax = plt.subplots(figsize=(16, 8)
 
     sns.barplot(
         data=top_acquisitions_per_acquirer, 
         x="acquisition_price_usd_billions", 
         y="acquired_company", 
         hue="acquirer", 
-        palette=acquirer_palette,  # ✅ Fixed: Uses a Dictionary Instead of a List
+        palette=acquirer_palette,
         ax=ax
     )
 
