@@ -1,7 +1,7 @@
 # **Mergers & Acquisitions (M&A) Data Analysis Project**
 
 ## **Overview**
-This project is a **comprehensive data analysis of Mergers & Acquisitions (M&A)**, covering the **entire data pipeline** from **data extraction and cleaning to exploratory analysis, statistical testing, and visualization**. The goal is to **analyze acquisition trends, financial behaviors, and industry patterns** using data from **Financial Modeling Prep API** and **Tracxn Excel datasets**.
+This project is a **comprehensive data analysis of Mergers & Acquisitions (M&A)**, covering the **entire data pipeline** from **data extraction and cleaning to exploratory analysis, statistical testing, and visualization**. The goal is to **analyze acquisition trends, financial behaviors, and industry patterns** using data from **Financial Modeling Prep API** and **Tracxn Excel datasets**. Project tracking and task management were conducted using Jira ([Project Board](https://goldingra.atlassian.net/jira/software/projects/FP/boards/3))
 
 Additionally, an **interactive dashboard was developed in Streamlit** to enable **data exploration and visualization**. Further, **Tableau visualizations** provide additional insights.
 
