@@ -5,6 +5,36 @@ import streamlit_functions as sql  # Import the SQL functions
 st.title("M&A Analysis Dashboard")
 st.write("Welcome to the M&A Analysis Streamlit App for DA Ironhack 2025.")
 
+st.set_page_config(layout="wide")
+
+# Company logos
+company_logos = {
+    "Berkshire Hathaway": "berkshire.png",
+    "BlackRock": "blackrock.jpg",
+    "Goldman Sachs": "goldman.png",
+    "JPMorgan Chase": "jpmorgan.png",
+    "State Street": "statestreet.png"
+}
+
+# Display logos in a row
+st.markdown("### **Companies in this Analysis**")
+
+col1, col2, col3, col4, col5 = st.columns(5)  # Creates 5 equal columns
+
+with col1:
+    st.image(company_logos["Berkshire Hathaway"], caption="Berkshire Hathaway", use_column_width=True)
+
+with col2:
+    st.image(company_logos["BlackRock"], caption="BlackRock", use_column_width=True)
+
+with col3:
+    st.image(company_logos["Goldman Sachs"], caption="Goldman Sachs", use_column_width=True)
+
+with col4:
+    st.image(company_logos["JPMorgan Chase"], caption="JPMorgan Chase", use_column_width=True)
+
+with col5:
+    st.image(company_logos["State Street"], caption="State Street", use_column_width=True)
 # Create a sidebar menu
 option = st.sidebar.selectbox(
     "Choose an action:",
