@@ -230,6 +230,7 @@ def net_income_vs_acquisitions(engine):
         SELECT c.symbol, COUNT(*) as num_acquisitions
         FROM mergers_acquisitions ma
         JOIN companies c ON ma.acquirer = c.company_name
+        WHERE c.symbol IS NOT NULL
         GROUP BY c.symbol
     """
     
@@ -246,9 +247,17 @@ def net_income_vs_acquisitions(engine):
     df_income_latest = df_income.sort_values(by="date", ascending=False).drop_duplicates(subset=["symbol"])
     
     # Merge datasets
-    df_merged = pd.merge(df_income_latest, df_ma, on="symbol", how="left").fillna(0)
-    df_merged["netIncome_billion"] = df_merged["netIncome"] / 1e9
+    df_merged = pd.merge(df_income_latest, df_ma, on="symbol", how="outer").fillna(0)
+    df_merged["netIncome_billion"] = np.log1p(df_merged["netIncome"] / 1e9)  # Log transform
 
+    company_colors = {
+        "BRK-B": "#4B0082",
+        "BLK": "#000000",
+        "GS": "#A7E1FF",
+        "JPM": "#B5B5AC",
+        "STT": "#003865"
+    }
+    
     # Plot
     plt.figure(figsize=(10, 6))
     sns.scatterplot(
@@ -257,12 +266,11 @@ def net_income_vs_acquisitions(engine):
         y="num_acquisitions", 
         hue="symbol",  
         style="symbol",  
-        palette="tab10",  
+        palette=company_colors,  
         s=150  
     )
-    plt.xscale("log")
     plt.title("Net Income vs. Number of Acquisitions by Acquirer")
-    plt.xlabel("Net Income (in Billions USD, Log Scale)")
+    plt.xlabel("Log(1 + Net Income in Billions USD)")
     plt.ylabel("Number of M&A Deals")
     plt.xticks(rotation=45)
     plt.legend(title="Company", bbox_to_anchor=(1, 1))  
