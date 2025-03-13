@@ -430,7 +430,7 @@ def insert_data(engine):
     # Fetch available tables dynamically
     query_tables = "SHOW TABLES"
     tables_df = pd.read_sql(query_tables, engine)
-    tables = {str(i+1): table for i, table in enumerate(tables_df.iloc[:, 0])}  # Fixed empty dictionary issue
+    tables = {str(i+1): table for i, table in enumerate(tables_df.iloc[:, 0])}
 
     if not tables:
         print("No tables found in the database.")
@@ -552,10 +552,10 @@ def delete_entry(engine):
         print("Invalid choice. Please enter either 'symbol' or 'company_name'.")
 
     # Ask for the value to match
-    value = input(f"Enter the value for `{column_name}` (e.g., 'AAPL' or 'Apple Inc.'): ").strip()
+    value = input(f"Enter the value for '{column_name}' (e.g., 'AAPL' or 'Apple Inc.'): ").strip()
 
     # Confirm deletion
-    confirm = input(f"\nAre you sure you want to delete entries where `{column_name}` = '{value}' in `{table_name}`? (yes/no): ").strip().lower()
+    confirm = input(f"\nAre you sure you want to delete entries where '{column_name}' = '{value}' in `{table_name}`? (yes/no): ").strip().lower()
     if confirm != 'yes':
         print("Deletion cancelled.")
         return
@@ -568,6 +568,6 @@ def delete_entry(engine):
         with engine.connect() as conn:
             result = conn.execute(sql, params)
             conn.commit()
-        print(f"\n{result.rowcount} record(s) deleted from `{table_name}` where `{column_name}` = '{value}'.")
+        print(f"\n{result.rowcount} record(s) deleted from '{table_name}' where '{column_name}' = '{value}'.")
     except Exception as e:
         print(f"\nError deleting data: {e}")
