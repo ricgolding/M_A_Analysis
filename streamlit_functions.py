@@ -7,7 +7,7 @@ import seaborn as sns
 from sqlalchemy import text
 import getpass  # To get the password without showing the input
 import streamlit as st
-import os  # Use environment variables instead of getpass
+import os
 
 company_colors = {
     "Berkshire Hathaway": "#4B0082",
