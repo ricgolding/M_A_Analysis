@@ -220,7 +220,7 @@ def top_acquisitions(engine):
     #Create a Dictionary Mapping Acquirer to Color
     acquirer_palette = {acquirer: company_colors[acquirer] for acquirer in top_acquisitions_per_acquirer["acquirer"].unique()}
 
-    fig, ax = plt.subplots(figsize=(16, 8)
+    fig, ax = plt.subplots(figsize=(16, 8))
 
     sns.barplot(
         data=top_acquisitions_per_acquirer, 
